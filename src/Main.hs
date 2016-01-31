@@ -133,6 +133,13 @@ instance Arrow CircuitA where
   (CircuitA bc) *** (CircuitA de) = CircuitA $ bc *** de
   (CircuitA bc) &&& (CircuitA bd) = CircuitA $ bc &&& bd
 
+instance Functor (CircuitA r) where
+  fmap f ca = (arr f) . ca
+
+instance Applicative (CircuitA r) where
+  pure = arr . const
+  cf <*> ca = (arr (\(f,a) -> f a)) . (cf &&& ca)
+
 type CBool = Int
 type CInt32 = Int
 
