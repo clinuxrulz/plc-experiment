@@ -1,5 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE Arrows #-}
 
 module Main where
 
@@ -132,6 +133,30 @@ instance Arrow CircuitA where
   (CircuitA bc) *** (CircuitA de) = CircuitA $ bc *** de
   (CircuitA bc) &&& (CircuitA bd) = CircuitA $ bc &&& bd
 
+type CBool = Int
+type CInt32 = Int
+
+makeInputA :: String -> CircuitA () Int
+makeInputA name = CircuitA $ Kleisli $ const $ createInputNodeM name
+
+addInt32A :: CircuitA (CInt32,CInt32) CInt32
+addInt32A = CircuitA $ Kleisli $
+  (\(a,b) -> do
+    plus <- createFunctionNodeM "Int32.+"
+    wireNodeToNodeM a plus
+    wireNodeToNodeM b plus
+    return plus
+  )
+
+example1 :: CircuitA () CInt32
+example1 = proc x -> do
+  a <- makeInputA "a" -< x
+  b <- makeInputA "b" -< x
+  addInt32A -< (a,b)
+
+renderCircuitA :: CircuitA () a -> String
+renderCircuitA (CircuitA c) = renderCircuitM $ runKleisli c ()
+
 renderCircuitM :: CircuitM a -> String
 renderCircuitM c =
   let finalState = execState ((lowerCodensity . unCircuitM) c) initCircuitState
@@ -165,5 +190,5 @@ renderCircuitM c =
 
 main :: IO ()
 main = do
-  putStrLn $ renderCircuitM test
+  putStrLn $ renderCircuitA example1
   return ()

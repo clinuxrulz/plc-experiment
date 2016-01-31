@@ -20,3 +20,16 @@ typing the node ID.
 
 Implementing things this way allows you to have a proper ```Arrow``` interface, and not fall short by landing on a
 Cartesian Closed Category, as Haskell offers no syntactical support for that construct.
+
+## Examples
+
+### Example 1
+    example1 :: CircuitA () CInt32
+    example1 = proc x -> do
+      a <- makeInputA "a" -< x
+      b <- makeInputA "b" -< x
+      addInt32A -< (a,b)
+
+produces
+
+(https://raw.githubusercontent.com/clinuxrulz/plc-experiment/master/examples/example1.svg)
