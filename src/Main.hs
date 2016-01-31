@@ -36,17 +36,6 @@ data CircuitNodeType
   | CntOutput
   | CntFunction
 
-data Circuit a where
-  CLitBool :: Bool -> Circuit Bool
-  CLitInt :: Int -> Circuit Int
-  CVar :: Int -> Circuit a
-  COrInt :: Circuit Int -> Circuit Int -> Circuit Int
-  CAndInt :: Circuit Int -> Circuit Int -> Circuit Int
-  CNotInt :: Circuit Int -> Circuit Int
-  COrBool :: Circuit Bool -> Circuit Bool -> Circuit Bool
-  CAndBool :: Circuit Bool -> Circuit Bool -> Circuit Bool
-  CNotBool :: Circuit Bool -> Circuit Bool
-
 newtype CircuitM a = CircuitM (Codensity (State CircuitState) a)
 
 unCircuitM :: CircuitM a -> Codensity (State CircuitState) a
@@ -66,9 +55,6 @@ instance Monad CircuitM where
 instance MonadState CircuitState CircuitM where
   get = CircuitM $ lift get
   put = CircuitM . lift . put
-
-type CBool = Circuit Bool
-type CInt = Circuit Int
 
 newtype DString = DString (String -> String)
 
