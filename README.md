@@ -4,7 +4,7 @@ arrow instance for a circuit edsl (deep embedding)
 ## How its done
 First there is a state monad called ```CircuitM``` that maintains a collection of nodes.
 Then there are some helper methods for creating nodes and linking them together, namely
-```createInputNode```, ```createFunctionNode``` and ```wireNodeToNode```. This creates
+```createInputNodeM```, ```createFunctionNodeM``` and ```wireNodeToNodeM```. This creates
 the basic monadic interface for constructing the graph of nodes.
 
 So what about the ```Arrow``` interface?

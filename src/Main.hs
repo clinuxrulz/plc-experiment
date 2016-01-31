@@ -3,6 +3,8 @@
 
 module Main where
 
+import Prelude hiding (id, (.))
+import Control.Category
 import Control.Arrow
 import Control.Monad.Codensity
 import Control.Monad.State.Strict
@@ -75,8 +77,8 @@ allocIdent = do
   put $ cs { csNextIdent = ident + 1 }
   return ident
 
-createInputNode :: String -> CircuitM Int
-createInputNode name = do
+createInputNodeM :: String -> CircuitM Int
+createInputNodeM name = do
   ident <- allocIdent
   let node =
         CircuitNode {
@@ -87,8 +89,8 @@ createInputNode name = do
   modify (\cs -> cs { csNodeMap = IM.insert ident node (csNodeMap cs) })
   return ident
 
-createFunctionNode :: String -> CircuitM Int
-createFunctionNode name = do
+createFunctionNodeM :: String -> CircuitM Int
+createFunctionNodeM name = do
   ident <- allocIdent
   let node =
         CircuitNode {
@@ -99,25 +101,36 @@ createFunctionNode name = do
   modify (\cs -> cs { csNodeMap = IM.insert ident node (csNodeMap cs) })
   return ident
 
-wireNodeToNode :: Int -> Int -> CircuitM ()
-wireNodeToNode node1 node2 = do
+wireNodeToNodeM :: Int -> Int -> CircuitM ()
+wireNodeToNodeM node1 node2 = do
   modify (\cs -> cs { csWireMap = IM.insert node1 node2 (csWireMap cs) })
 
 plus :: Int -> Int -> CircuitM Int
 plus node1 node2 = do
-  plusId <- createFunctionNode "+"
-  wireNodeToNode node1 plusId
-  wireNodeToNode node2 plusId
+  plusId <- createFunctionNodeM "+"
+  wireNodeToNodeM node1 plusId
+  wireNodeToNodeM node2 plusId
   return plusId
 
 test :: CircuitM ()
 test = do
-  a <- createInputNode "a"
-  b <- createInputNode "b"
+  a <- createInputNodeM "a"
+  b <- createInputNodeM "b"
   r <- a `plus` b
   return ()
 
 newtype CircuitA a b = CircuitA (Kleisli CircuitM a b)
+
+instance Category CircuitA where
+  id = CircuitA id
+  (CircuitA bc) . (CircuitA ab) = CircuitA (bc . ab)
+
+instance Arrow CircuitA where
+  arr = CircuitA . arr
+  first (CircuitA bc) = CircuitA $ first bc
+  second (CircuitA bc) = CircuitA $ second bc
+  (CircuitA bc) *** (CircuitA de) = CircuitA $ bc *** de
+  (CircuitA bc) &&& (CircuitA bd) = CircuitA $ bc &&& bd
 
 renderCircuitM :: CircuitM a -> String
 renderCircuitM c =
