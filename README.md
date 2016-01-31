@@ -32,4 +32,5 @@ Cartesian Closed Category, as Haskell offers no syntactical support for that con
 
 produces
 
-(https://raw.githubusercontent.com/clinuxrulz/plc-experiment/master/examples/example1.svg)
+![example 1]
+(https://raw.githubusercontent.com/clinuxrulz/plc-experiment/master/examples/example1.png)
